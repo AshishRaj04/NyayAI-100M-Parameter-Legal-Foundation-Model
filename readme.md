@@ -1,4 +1,4 @@
-<![CDATA[<p align="center">
+<p align="center">
   <img src="IMG/nyayAI.png" alt="NyayAI Logo" width="600">
 </p>
 
@@ -72,9 +72,9 @@ After the dramatic initial learning in Epoch 1, Epoch 2 shows steady refinement 
 </p>
 
 | Epoch | Train Loss | Val Loss | Perplexity | Time      |
-|-------|-----------|----------|------------|-----------|
-| 1     | 2.760     | 2.674    | 14.50      | 3.7 hours |
-| 2     | 2.540     | 2.460    | 11.70      | 3.5 hours |
+| ----- | ---------- | -------- | ---------- | --------- |
+| 1     | 2.760      | 2.674    | 14.50      | 3.7 hours |
+| 2     | 2.540      | 2.460    | 11.70      | 3.5 hours |
 
 > **Training paused after 2 epochs** ($30 compute budget spent). Will resume epochs 3-5 next month. The loss curve is still trending downward — more improvement expected.
 
@@ -308,4 +308,3 @@ Built as a proof-of-concept for AI-powered legal intelligence in India.
 ## 📄 License
 
 This project is for educational and research purposes. The training data consists of publicly available Indian court judgments.
-]]>
