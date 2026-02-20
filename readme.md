@@ -1,14 +1,30 @@
-# Project NyayAI
+<![CDATA[<p align="center">
+  <img src="IMG/nyayAI.png" alt="NyayAI Logo" width="600">
+</p>
 
-**A 103M Parameter LLM Trained from Scratch on Indian Legal Data**
+<h1 align="center">NyayAI — 103M Parameter Legal Foundation Model</h1>
 
-NyayAI is a custom-built GPT-style language model trained entirely from scratch on 269 million tokens of Indian Supreme Court and High Court judgments. No pre-trained weights, no fine-tuning — every parameter was learned from raw legal text.
+<p align="center">
+  <b>A GPT-style Language Model Trained from Scratch on Indian Legal Data</b>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Parameters-103M-blue?style=for-the-badge" alt="Parameters">
+  <img src="https://img.shields.io/badge/Tokens-269M-green?style=for-the-badge" alt="Tokens">
+  <img src="https://img.shields.io/badge/Corpus-1.25_GB-orange?style=for-the-badge" alt="Corpus">
+  <img src="https://img.shields.io/badge/Architecture-Transformer-purple?style=for-the-badge" alt="Architecture">
+  <img src="https://img.shields.io/badge/Framework-PyTorch-red?style=for-the-badge" alt="Framework">
+</p>
+
+---
+
+NyayAI is a custom-built GPT-style language model trained **entirely from scratch** on 269 million tokens of Indian Supreme Court and High Court judgments. No pre-trained weights, no fine-tuning — every parameter was learned from raw legal text.
 
 ---
 
 ## 🎯 The Problem
 
-India's legal system faces a staggering backlog of over **5 crore pending cases**. This judicial pendency causes inordinate delays, denying timely justice to millions. Legal research, case analysis, and document drafting remain extremely time-intensive bottlenecks.
+India's legal system faces a staggering backlog of over **5 crore pending cases**. Legal research, case analysis, and document drafting remain extremely time-intensive. Access to justice is delayed for millions.
 
 ## 💡 The Solution
 
@@ -28,6 +44,47 @@ This repository contains the **complete, end-to-end pipeline**: raw data process
 - **Fault-tolerant training** — Per-epoch checkpointing with auto-download and resumable training
 - **Runs locally** — Fast CPU inference (~10 tokens/sec), no GPU needed for generation
 - **Web interface** — Dark-themed premium UI with generation controls
+
+---
+
+## 📊 Training Results
+
+### Full Training Curve (Log Scale)
+
+The model's loss dropped from **495 → 2.46** across 2 epochs of training on ~59K gradient steps.
+
+<p align="center">
+  <img src="IMG/training_loss_full.png" alt="Full Training Loss Curve" width="900">
+</p>
+
+### Epoch 2 — Fine-Tuning Phase
+
+After the dramatic initial learning in Epoch 1, Epoch 2 shows steady refinement as the model learns subtler legal patterns. Val loss: **2.67 → 2.46** (perplexity: 14.4 → 11.7).
+
+<p align="center">
+  <img src="IMG/epoch2_loss.png" alt="Epoch 2 Loss Curve" width="900">
+</p>
+
+### Loss Reduction Summary
+
+<p align="center">
+  <img src="IMG/loss_comparison.png" alt="Loss Comparison" width="500">
+</p>
+
+| Epoch | Train Loss | Val Loss | Perplexity | Time      |
+|-------|-----------|----------|------------|-----------|
+| 1     | 2.760     | 2.674    | 14.50      | 3.7 hours |
+| 2     | 2.540     | 2.460    | 11.70      | 3.5 hours |
+
+> **Training paused after 2 epochs** ($30 compute budget spent). Will resume epochs 3-5 next month. The loss curve is still trending downward — more improvement expected.
+
+### Learning Rate Schedule
+
+Cosine decay with linear warmup. Note the warmup reset at epoch 2 boundary (a known behavior during resume).
+
+<p align="center">
+  <img src="IMG/lr_schedule.png" alt="Learning Rate Schedule" width="900">
+</p>
 
 ---
 
@@ -73,7 +130,7 @@ Logits (50,257)
 
 ---
 
-## 📊 Training Details
+## ⚙️ Training Configuration
 
 ### Infrastructure
 
@@ -84,7 +141,7 @@ Logits (50,257)
 | Tokenizer         | tiktoken (GPT-2 BPE, 50,257 tokens)                |
 | Training Platform | Modal (serverless GPU cloud)                       |
 
-### Training Configuration
+### Hyperparameters
 
 | Setting                 | Value                                     |
 | ----------------------- | ----------------------------------------- |
@@ -97,20 +154,7 @@ Logits (50,257)
 | Min Learning Rate       | 4e-5                                      |
 | LR Schedule             | Linear warmup (2000 steps) → Cosine decay |
 | Gradient Clipping       | 1.0 (global norm)                         |
-| Epochs                  | 5 (in progress)                           |
-
-### Training Progress (Epoch 1 / 5)
-
-| Metric           | Value                    |
-| ---------------- | ------------------------ |
-| Training Time    | 223 minutes (~3.7 hours) |
-| Starting Loss    | 495.7                    |
-| Final Train Loss | 2.760                    |
-| Final Val Loss   | 2.674                    |
-| Tokens Processed | 242M                     |
-| Checkpoint Size  | 1,185 MB                 |
-
-> Loss dropped from **495 → 2.67** in a single epoch across 29,564 batches. Remaining 4 epochs will further improve quality.
+| Target Epochs           | 5 (2 completed)                           |
 
 ### Fault-Tolerant Training Features
 
@@ -125,29 +169,39 @@ Logits (50,257)
 ## 📂 Project Structure
 
 ```
-LLM-FROM-SCRATCH/
+NyayAI/
 │
 ├── llm_engine.py              # GPT model architecture (Transformer, MHA, FFN)
 ├── data_loader.py             # Dataset/DataLoader (chunked tokenization)
 ├── data_cleaner.py            # Raw legal text cleaning pipeline
 ├── training.py                # Modal-based distributed training script
 ├── count_params.py            # Parameter counting utility
+├── plot_training.py           # Matplotlib visualisation generator
 │
-├── inference/                 # Inference & web UI
-│   ├── infer.py               # Local inference engine (standalone or importable)
-│   ├── app.py                 # Flask web server
-│   └── templates/
-│       └── index.html         # Dark-themed web interface
+├── infer.py                   # Local inference engine (standalone or importable)
+├── app.py                     # Flask web server
+├── templates/
+│   └── index.html             # Dark-themed web interface
+│
+├── IMG/                       # Training plots & assets
+│   ├── nyayAI.png             # Logo
+│   ├── training_loss_full.png # Full training curve (log scale)
+│   ├── epoch2_loss.png        # Epoch 2 zoom
+│   ├── loss_comparison.png    # Bar chart comparison
+│   └── lr_schedule.png        # Learning rate schedule
 │
 ├── checkpoints/               # Model checkpoints (not in git)
 │   ├── epoch_1_model_and_optimizer.pth
-│   └── training_log_epoch_1.json
+│   ├── epoch_2_model_and_optimizer.pth
+│   ├── training_log_epoch_1.json
+│   └── training_log_epoch_2.json
 │
 ├── data/                      # Training corpus
 │   └── combined_legal_data.txt
 │
 ├── logs/                      # Raw training logs
-│   └── epoch_1_logs.txt
+│   ├── epoch_1_logs.txt
+│   └── epoch_2_logs.txt
 │
 ├── requirements.txt
 └── README.md
@@ -160,8 +214,8 @@ LLM-FROM-SCRATCH/
 ### 1. Install Dependencies
 
 ```bash
-git clone https://github.com/your-username/LLM-FROM-SCRATCH.git
-cd LLM-FROM-SCRATCH
+git clone https://github.com/AshishRaj04/NyayAI-100M-Parameter-Legal-Foundation-Model.git
+cd NyayAI-100M-Parameter-Legal-Foundation-Model
 
 python -m venv .venv
 .venv\Scripts\activate       # Windows
@@ -173,13 +227,13 @@ pip install -r requirements.txt
 ### 2. Run Inference (CLI)
 
 ```bash
-python inference/infer.py --prompt "The verdict of the court is " --max-tokens 200
+python infer.py --prompt "The verdict of the court is " --max-tokens 200
 ```
 
 ### 3. Run Web Server
 
 ```bash
-python inference/app.py
+python app.py
 # Open http://localhost:5000
 ```
 
@@ -190,8 +244,26 @@ python inference/app.py
 modal run training.py --num-epochs 5 --eval-freq 50 --eval-iter 5
 
 # Resume from checkpoint
-modal run training.py --num-epochs 5 --resume-from runs/20260219-184305/epoch_1_model_and_optimizer.pth
+modal run training.py --num-epochs 5 --resume-from runs/<run-id>/epoch_2_model_and_optimizer.pth
 ```
+
+---
+
+## 📈 Sample Outputs
+
+**Prompt:** `Under Section 498A of the Indian Penal Code,`
+
+**Generated (Epoch 1, Val Loss 2.67):**
+
+> Under Section 498A of the Indian Penal Code, as per the document, the charge under Section 376 IPC was based on the complaint, which was filed by the appellant before the trial court.
+
+**Prompt:** `The verdict of the court is`
+
+**Generated (Epoch 2, Val Loss 2.46):**
+
+> The verdict of the court is that the appellant has failed to prove that the order of the trial court is based on the evidence on record and the observations made by the High Court.
+
+> _Note: After 2 epochs, the model generates grammatically correct legal English and understands court terminology. Section-specific accuracy improves with further training._
 
 ---
 
@@ -209,18 +281,6 @@ modal run training.py --num-epochs 5 --resume-from runs/20260219-184305/epoch_1_
 
 ---
 
-## 📈 Sample Output
-
-**Prompt:** `Under Section 498A of the Indian Penal Code,`
-
-**Generated (Epoch 1):**
-
-> Under Section 498A of the Indian Penal Code, as per the document, the charge under Section 376 IPC was based on the complaint, which was filed by the appellant before the trial court.
-
-> _Note: After epoch 1, the model generates coherent legal English but may reference incorrect sections. Quality improves significantly with continued training (epochs 2-5)._
-
----
-
 ## 🔮 Roadmap
 
 - [x] Custom GPT architecture from scratch
@@ -228,7 +288,9 @@ modal run training.py --num-epochs 5 --resume-from runs/20260219-184305/epoch_1_
 - [x] Per-epoch checkpointing & resumable training
 - [x] Local CPU inference engine
 - [x] Web interface with generation controls
-- [ ] Complete 5-epoch training
+- [x] Epoch 1-2 training complete (val loss: 2.46)
+- [x] Training visualisation & analysis plots
+- [ ] Complete 5-epoch training (epochs 3-5)
 - [ ] RAG integration for grounded legal answers
 - [ ] Fine-tuning for instruction-following
 - [ ] Deployment to production
@@ -246,3 +308,4 @@ Built as a proof-of-concept for AI-powered legal intelligence in India.
 ## 📄 License
 
 This project is for educational and research purposes. The training data consists of publicly available Indian court judgments.
+]]>
