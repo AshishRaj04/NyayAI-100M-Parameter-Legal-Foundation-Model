@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NyayAI – Legal Intelligence | 103M Parameter LLM</title>
+  <meta name="description" content="AI-powered legal text generation built from scratch. 103M parameter transformer trained on Indian legal corpus." />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Serif+4:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg-primary: #0a0a0f;
+      --bg-secondary: #12121a;
+      --bg-card: #16161f;
+      --bg-input: #1a1a25;
+      --text-primary: #e8e6e3;
+      --text-secondary: #9d9b98;
+      --text-muted: #5c5a57;
+      --accent: #10b981;
+      --accent-glow: rgba(16, 185, 129, 0.15);
+      --accent-dim: #064e3b;
+      --border: #2a2a35;
+      --border-hover: #3a3a48;
+      --error: #ef4444;
+      --warning-bg: rgba(251, 191, 36, 0.08);
+      --warning-border: rgba(251, 191, 36, 0.2);
+      --warning-text: #fbbf24;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 25% 25%, rgba(16, 185, 129, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 75% 75%, rgba(99, 102, 241, 0.03) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Header */
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+      padding-top: 2.5rem;
+    }
+
+    .logo {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, #10b981, #34d399);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .tagline {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+      font-weight: 300;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent-dim);
+      color: var(--accent);
+      padding: 0.35rem 0.85rem;
+      border-radius: 100px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: 1rem;
+      letter-spacing: 0.02em;
+    }
+
+    .badge .pulse {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Stats */
+    .stats {
+      display: flex;
+      justify-content: center;
+      gap: 1px;
+      margin-top: 2rem;
+      background: var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .stat {
+      flex: 1;
+      text-align: center;
+      padding: 1.25rem 1rem;
+      background: var(--bg-card);
+      transition: background 0.2s;
+    }
+
+    .stat:hover { background: var(--bg-input); }
+
+    .stat-value {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-label {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 0.25rem;
+    }
+
+    /* Query Section */
+    .query-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.75rem;
+      margin-bottom: 1.25rem;
+      transition: border-color 0.3s;
+    }
+
+    .query-section:focus-within {
+      border-color: var(--accent-dim);
+    }
+
+    .query-label {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 110px;
+      padding: 1rem 1.15rem;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-family: inherit;
+      font-size: 1rem;
+      color: var(--text-primary);
+      background: var(--bg-input);
+      resize: vertical;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    textarea::placeholder { color: var(--text-muted); }
+
+    /* Controls */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    .control-group select,
+    .control-group input[type="number"] {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 0.78rem;
+      width: 70px;
+    }
+
+    .control-group select:focus,
+    .control-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .button-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 1.25rem;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #059669, #10b981);
+      color: white;
+      border: none;
+      padding: 0.85rem 2.25rem;
+      border-radius: 10px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 12px rgba(16, 185, 129, 0.2);
+    }
+
+    .submit-btn:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 20px rgba(16, 185, 129, 0.35);
+    }
+
+    .submit-btn:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      background: var(--border);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .loader {
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Example chips */
+    .examples {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 1rem;
+    }
+
+    .example-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.85rem;
+      border-radius: 100px;
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+
+    .example-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-glow);
+    }
+
+    /* Disclaimer */
+    .disclaimer {
+      background: var(--warning-bg);
+      border: 1px solid var(--warning-border);
+      border-radius: 10px;
+      padding: 0.75rem 1rem;
+      font-size: 0.78rem;
+      color: var(--warning-text);
+      margin-bottom: 1.25rem;
+      text-align: center;
+    }
+
+    /* Response */
+    .response-section {
+      display: none;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .response-section.visible { display: block; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .response-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .response-header {
+      background: var(--bg-secondary);
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .response-header-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .response-header h3 {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 0.35rem 0.7rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+
+    .copy-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .response-body { padding: 1.5rem; }
+
+    .answer-text {
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 1.05rem;
+      line-height: 1.85;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+    }
+
+    .answer-text.loading {
+      color: var(--text-muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .answer-text.loading .typing-dots span {
+      animation: blink 1.4s infinite both;
+      font-size: 1.5rem;
+      line-height: 1;
+    }
+    .answer-text.loading .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .answer-text.loading .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 60%, 100% { opacity: 0.2; }
+      30% { opacity: 1; }
+    }
+
+    .error-text {
+      color: var(--error);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.9rem;
+    }
+
+    .meta-info {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      gap: 1.5rem;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    footer a:hover { opacity: 0.8; }
+
+    .tech-stack {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-top: 0.75rem;
+    }
+
+    .tech-tag {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .container { padding: 1rem; }
+      .stats { flex-direction: column; gap: 1px; }
+      .button-row { flex-direction: column; align-items: stretch; }
+      .submit-btn { justify-content: center; }
+      .controls { flex-direction: column; align-items: flex-start; }
+      .logo { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1 class="logo">Nyay<span>AI</span></h1>
+      <p class="tagline">Legal Intelligence powered by a from-scratch Transformer</p>
+      <div class="badge">
+        <span class="pulse"></span>
+        103M Parameter GPT &middot; Trained on Indian Legal Corpus
+      </div>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-value">103M</div>
+          <div class="stat-label">Parameters</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">269M</div>
+          <div class="stat-label">Training Tokens</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">9</div>
+          <div class="stat-label">Transformer Layers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">1.25 GB</div>
+          <div class="stat-label">Legal Corpus</div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="query-section" id="query-section">
+        <label class="query-label" for="query-input">
+          <span>&#9998;</span> Enter a legal prompt
+        </label>
+        <textarea
+          id="query-input"
+          placeholder="e.g., The Supreme Court held that the right to privacy is..."
+        ></textarea>
+
+        <div class="examples">
+          <button class="example-btn" data-query="The verdict of the court is ">Court Verdict</button>
+          <button class="example-btn" data-query="Under Section 498A of the Indian Penal Code, ">Section 498A IPC</button>
+          <button class="example-btn" data-query="The constitutional validity of ">Constitutional Validity</button>
+          <button class="example-btn" data-query="In the matter of bail application, the court observed that ">Bail Application</button>
+          <button class="example-btn" data-query="The doctrine of res judicata ">Res Judicata</button>
+        </div>
+
+        <div class="controls">
+          <div class="control-group">
+            <label>Tokens:</label>
+            <input type="number" id="max-tokens" value="256" min="32" max="512" step="32" />
+          </div>
+          <div class="control-group">
+            <label>Temp:</label>
+            <input type="number" id="temperature" value="0.8" min="0" max="1.5" step="0.1" />
+          </div>
+          <div class="control-group">
+            <label>Top-K:</label>
+            <input type="number" id="top-k" value="40" min="1" max="100" step="5" />
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="submit-btn" id="submit-btn">
+            <span id="btn-text">Generate</span>
+            <div class="loader" id="loader" style="display: none;"></div>
+          </button>
+          <span class="hint">Press Ctrl+Enter to generate</span>
+        </div>
+      </section>
+
+      <div class="disclaimer">
+        &#x26A0;&#xFE0F; AI-generated legal text. This is a research model &mdash; always verify with official sources.
+      </div>
+
+      <section class="response-section" id="response-section">
+        <div class="response-card">
+          <div class="response-header">
+            <div class="response-header-left">
+              <span>&#x1F4DC;</span>
+              <h3>Generated Text</h3>
+            </div>
+            <button class="copy-btn" id="copy-btn" title="Copy to clipboard">Copy</button>
+          </div>
+          <div class="response-body">
+            <div class="answer-text" id="answer-text"></div>
+            <div class="meta-info" id="meta-info" style="display: none;">
+              <span id="meta-tokens"></span>
+              <span id="meta-time"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2025 NyayAI &middot; Built by <a href="#">Ashish Raj</a></p>
+      <div class="tech-stack">
+        <span class="tech-tag">PyTorch</span>
+        <span class="tech-tag">Transformer</span>
+        <span class="tech-tag">103M Params</span>
+        <span class="tech-tag">tiktoken</span>
+        <span class="tech-tag">From Scratch</span>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    const queryInput = document.getElementById('query-input');
+    const submitBtn = document.getElementById('submit-btn');
+    const btnText = document.getElementById('btn-text');
+    const loader = document.getElementById('loader');
+    const responseSection = document.getElementById('response-section');
+    const answerText = document.getElementById('answer-text');
+    const copyBtn = document.getElementById('copy-btn');
+    const metaInfo = document.getElementById('meta-info');
+
+    // Example buttons
+    document.querySelectorAll('.example-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        queryInput.value = btn.dataset.query;
+        queryInput.focus();
+      });
+    });
+
+    // Ctrl+Enter to submit
+    queryInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        submitBtn.click();
+      }
+    });
+
+    // Copy button
+    copyBtn.addEventListener('click', () => {
+      const text = answerText.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => { copyBtn.textContent = 'Copy'; }, 1500);
+      });
+    });
+
+    // Submit
+    submitBtn.addEventListener('click', async () => {
+      const query = queryInput.value.trim();
+      if (!query) {
+        queryInput.focus();
+        return;
+      }
+
+      const maxTokens = parseInt(document.getElementById('max-tokens').value) || 256;
+      const temperature = parseFloat(document.getElementById('temperature').value) || 0.8;
+      const topK = parseInt(document.getElementById('top-k').value) || 40;
+
+      // Loading state
+      submitBtn.disabled = true;
+      btnText.textContent = 'Generating...';
+      loader.style.display = 'block';
+      responseSection.classList.add('visible');
+      answerText.className = 'answer-text loading';
+      answerText.innerHTML = 'Generating legal text<span class="typing-dots"><span>.</span><span>.</span><span>.</span></span>';
+      metaInfo.style.display = 'none';
+
+      const startTime = performance.now();
+
+      try {
+        const response = await fetch('/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            prompt: query,
+            max_tokens: maxTokens,
+            temperature: temperature,
+            top_k: topK
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error || 'Request failed');
+        }
+
+        const data = await response.json();
+        const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+
+        answerText.className = 'answer-text';
+        answerText.textContent = data.generated_text || 'No response generated.';
+
+        // Show meta
+        metaInfo.style.display = 'flex';
+        document.getElementById('meta-time').textContent = `Time: ${elapsed}s`;
+        document.getElementById('meta-tokens').textContent = `Max tokens: ${maxTokens}`;
+
+      } catch (error) {
+        answerText.className = 'answer-text error-text';
+        answerText.textContent = 'Error: ' + error.message;
+      } finally {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Generate';
+        loader.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
